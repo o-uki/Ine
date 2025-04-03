@@ -81,7 +81,11 @@ void run_commands(char* rows, size_t x_size, size_t y_size)
                         copy_token[k] = rows[program_count * x_size + k + strlen(*flow_commands[i].token) + 1];
                     }
 
-                    /* 引数を */
+                    /* 関数コマンドがあるか判定 */
+                    if (!(copy_token[0] == '\0'))
+                    {
+                        
+                    }
                 }
             }
         }
