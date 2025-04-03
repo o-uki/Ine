@@ -1,18 +1,19 @@
 #include <stdio.h>
 #include <string.h>
 
+/* 見ている行 */
 int in_row;
 
-/* フローコマンドの型と生成する関数 */
-struct flow_command
+/* コマンドの型と生成する関数 */
+struct Command
 {
-    char *token[16];
-    char *type[32];
+    char* token[16];
+    char* type[32];
 };
 
-struct flow_command create_flow_command(char set_token[16], char set_type[32])
+struct Command create_command(char set_token[], char set_type[])
 {
-    struct flow_command new_command;
+    struct Command new_command;
 
     *new_command.token = set_token;
     *new_command.type = set_type;
@@ -20,21 +21,53 @@ struct flow_command create_flow_command(char set_token[16], char set_type[32])
     return new_command;
 }
 
-/* Ineを実行する関数 */
-void run_command(char rows[256][128])
+/* 関数コマンドの実行内容定義 */
+int run_function_command(char type[], int operands[])
 {
-    struct flow_command flow_commands[4] = {
-        create_flow_command("I", "sequence"),
-        create_flow_command("?", "selection")
+    if (strcmp(type, "write") == 0)
+    {
+        printf("%d\n", operands[0]);
+
+        return 1;
+    }
+
+    return 0;
+};
+
+/* Ineを実行する関数 */
+void run_commands(char rows[], size_t x_size, size_t y_size)
+{
+    /* フローコマンド定義 */
+    struct Command flow_commands[] = {
+        create_command("I", "sequence"),
+        create_command("?", "selection")
     };
 
-    printf("%s", rows[1]);
+    /* 関数コマンド定義 */
+    struct Command function_commands[] = {
+        create_command("wr", "write"),
+        create_command("eq", "equal")
+    };
+
+    for (size_t i = 0; i < sizeof flow_commands / sizeof flow_commands[0]; i++)
+    {
+        char copy_token[16];
+        for (size_t j = 0; j < strlen(*flow_commands[i].token); j++)
+        {
+            copy_token[j] = rows[in_row * x_size + j];
+        }
+
+        if (strcmp(*flow_commands[i].token, copy_token))
+        {
+            
+        }
+    }
 }
 
 int main(void)
 {
     /* ファイル読み込み */
-    FILE *filep = fopen("sample.ine", "r");
+    FILE* filep = fopen("sample.ine", "r");
 
     char source_code_rows[256][128];
     size_t get_file_row = 0;
@@ -42,14 +75,14 @@ int main(void)
     char file_row[128];
     while (fgets(file_row, 128, filep)[strlen(file_row) - 1] == '\n')
     {
-        strcpy(source_code_rows[get_file_row], file_row);
+        memmove(source_code_rows[get_file_row], file_row, sizeof file_row);
 
         get_file_row++;
     }
     fgets(file_row, 128, filep);
-    strcpy(source_code_rows[get_file_row], file_row);
+    memmove(source_code_rows[get_file_row], file_row, sizeof file_row);
 
-    run_command(source_code_rows);
+    run_commands(&source_code_rows[0][0], 128, 256);
     
     fclose(filep);
 
