@@ -7,16 +7,16 @@ int in_row;
 /* コマンドの型と生成する関数 */
 struct Command
 {
-    char* token[16];
-    char* type[32];
+    char token[16];
+    char type[32];
 };
 
 struct Command create_command(char set_token[], char set_type[])
 {
     struct Command new_command;
 
-    *new_command.token = set_token;
-    *new_command.type = set_type;
+    *new_command.token = *set_token;
+    *new_command.type = *set_type;
 
     return new_command;
 }
@@ -51,15 +51,27 @@ void run_commands(char rows[], size_t x_size, size_t y_size)
 
     for (size_t i = 0; i < sizeof flow_commands / sizeof flow_commands[0]; i++)
     {
+        /* 文字列を比較したい文字数切り出す */
         char copy_token[16];
-        for (size_t j = 0; j < strlen(*flow_commands[i].token); j++)
+        for (size_t j = 0; j < strlen(flow_commands[i].token); j++)
         {
             copy_token[j] = rows[in_row * x_size + j];
         }
 
-        if (strcmp(*flow_commands[i].token, copy_token))
+        if (strcmp(flow_commands[i].token, copy_token))
         {
-            
+            if (strcmp(flow_commands[i].type, "sequence"))
+            {
+                for (size_t j = 0; j < strlen(copy_token); j++)
+                {
+                    copy_token[j] = '\0';
+                }
+
+                for (size_t j = 0; j < sizeof function_commands / sizeof function_commands[0]; j++)
+                {
+                    
+                }
+            }
         }
     }
 }
