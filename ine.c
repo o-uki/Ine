@@ -8,25 +8,61 @@ int program_count = 1;
 struct Command
 {
     char* token[16];
-    char* type[32];
+    char* code[32];
 };
 
-struct Command create_command(char* set_token, char* set_type)
+struct Command create_command(char* set_token, char* set_code)
 {
     struct Command new_command;
 
     *new_command.token = set_token;
-    *new_command.type = set_type;
+    *new_command.code = set_code;
 
     return new_command;
 }
 
-/* 関数コマンドの実行内容定義 */
-int run_function_command(char* type, int* operands)
+/* 接頭辞の型と生成する関数 */
+struct Argument_Prefix
 {
-    if (strcmp(type, "write") == 0)
+    char* token[8];
+    char* code[32];
+};
+
+struct Argument_Prefix create_argument_prefix(char* set_token, char* set_code)
+{
+    struct Argument_Prefix new_argument_prefix;
+
+    *new_argument_prefix.token = set_token;
+    *new_argument_prefix.code = set_code;
+
+    return new_argument_prefix;
+}
+
+/* 接頭辞によって引数を変換する関数 */
+int calculate_argument(char* argument_string)
+{
+    /* 接頭辞定義 */
+    struct Argument_Prefix argument_prefixes[] = {
+        create_argument_prefix("r", "reference"),
+        create_argument_prefix("h", "hexadecimal"),
+        create_argument_prefix("b", "binary")
+    };
+
+    /* 接頭辞があるか判断してあれば戻り値を返し関数終了 */
+    for (size_t i = 0; i < sizeof argument_prefixes / sizeof argument_prefixes[0]; i++)
     {
-        printf("%d\n", operands[0]);
+        
+    }
+
+    return 0;
+}
+
+/* 関数コマンドの実行内容定義関数 */
+int run_function_command(char* code, int* arguments)
+{
+    if (strcmp(code, "write") == 0)
+    {
+        printf("%d\n", arguments[0]);
 
         return 1;
     }
@@ -64,7 +100,7 @@ void run_commands(char* rows, size_t x_size, size_t y_size)
 
         if (strcmp(*flow_commands[i].token, copy_token) == 0)
         {
-            if (strcmp(*flow_commands[i].type, "sequence") == 0)
+            if (strcmp(*flow_commands[i].code, "sequence") == 0)
             {
                 /* 関数コマンドに当てはまるか */
                 for (size_t j = 0; j < sizeof function_commands / sizeof function_commands[0]; j++)
@@ -84,7 +120,41 @@ void run_commands(char* rows, size_t x_size, size_t y_size)
                     /* 関数コマンドがあるか判定 */
                     if (!(copy_token[0] == '\0'))
                     {
-                        
+                        /* 引数の配列と一時的に引数を保存する変数 */
+                        char argument_string[16];
+                        int arguments[8];
+                        size_t arugment_string_count = 0, arguments_count = 0;
+
+                        /* 引数が書いてある文字列をコピー */
+                        char copy_arguments_token[128];
+
+                        copy_arguments_token[0] = rows[program_count * x_size + strlen(*flow_commands[i].token) + strlen(*function_commands[j].token) + 1];
+                        for (size_t k = 1; !(copy_arguments_token[strlen(copy_arguments_token) - 1] == '\0' || copy_arguments_token[strlen(copy_arguments_token) - 1] == ')'); k++)
+                        {
+                            copy_arguments_token[k] = rows[program_count * x_size + k + strlen(*flow_commands[i].token) + strlen(*function_commands[j].token) + 1];
+                        }
+
+                        for (size_t k = 0; k < strlen(copy_arguments_token); k++)
+                        {
+                            if (!(copy_arguments_token[k] == '(' || copy_arguments_token[k] == ')' || copy_arguments_token[k] == ','))
+                            {
+                                argument_string[arugment_string_count] = copy_arguments_token[k];
+                                arugment_string_count++;
+                            } else if (copy_arguments_token[k] == ',')
+                            {
+                                arguments[arguments_count] = calculate_argument(&argument_string);
+                                arguments_count++;
+
+                                for (size_t l = 0; l < strlen(argument_string); l++)
+                                {
+                                    argument_string[l] = '\0';
+                                }
+                                arugment_string_count = 0;
+                            } else if (copy_arguments_token[k] == ')')
+                            {
+                                arguments[arguments_count] = calculate_argument(&argument_string);
+                            }
+                        }
                     }
                 }
             }
