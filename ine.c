@@ -4,6 +4,7 @@
 
 /* 見ている行 */
 size_t program_count;
+size_t loop_count;
 
 /* コマンドの型と生成する関数 */
 struct Command
@@ -59,8 +60,8 @@ int calculate_argument(char* argument_string)
     /* 接頭辞定義 */
     struct Argument_Prefix argument_prefixes[] = {
         create_argument_prefix("r", "reference"),
-        create_argument_prefix("h", "hexadecimal"),
-        create_argument_prefix("b", "binary")
+        create_argument_prefix("0x", "hexadecimal"),
+        create_argument_prefix("0b", "binary")
     };
 
     /* 文字列を比較したい文字数切り出す用の変数 */
@@ -141,7 +142,7 @@ int* get_arguments(char* rows, size_t x_size, char* flow_command_token, char* fu
 }
 
 /* 関数コマンドの実行内容定義関数 */
-int run_function_command(char* code, int* arguments)
+_Bool run_function_command(char* code, int* arguments)
 {
     if (strcmp(code, "write") == 0)
     {
@@ -156,6 +157,7 @@ int run_function_command(char* code, int* arguments)
 /* Ineを実行する関数 */
 void run_commands(char* rows, size_t x_size, size_t y_size)
 {
+
     /* フローコマンド定義 */
     struct Command flow_commands[] = {
         create_command("I", "sequence"),
@@ -168,6 +170,12 @@ void run_commands(char* rows, size_t x_size, size_t y_size)
         create_command("wr", "write"),
         create_command("eq", "equal")
     };
+
+    loop_count++;
+    if (loop_count > 262144)
+    {
+        exit(EXIT_FAILURE);
+    }
 
     /* フローコマンドに当てはまるか */
     for (size_t i = 0; i < sizeof flow_commands / sizeof flow_commands[0]; i++)
@@ -198,10 +206,7 @@ void run_commands(char* rows, size_t x_size, size_t y_size)
                     for (size_t k = 0; k < strlen(*function_commands[j].token); k++)
                     {
                         copy_token[k] = rows[program_count * x_size + k + strlen(*flow_commands[i].token) + 1];
-                        // printf("b: %lu\n", program_count * x_size + k + strlen(*flow_commands[i].token) + 1);
                     }
-
-                    // printf("c: %s\n", copy_token);
 
                     /* 関数コマンドがあるか判定 */
                     if (strcmp(copy_token, *function_commands[j].token) == 0)
@@ -215,7 +220,41 @@ void run_commands(char* rows, size_t x_size, size_t y_size)
                 }
 
                 program_count++;
+            } else if (strcmp(*flow_commands[i].code, "selection") == 0)
+            {
+                for (size_t j = 0; j < sizeof function_commands / sizeof function_commands[0]; j++)
+                {
+                    /* 文字列を比較したい文字数切り出す用の変数リセット */
+                    for (size_t k = 0; k < sizeof copy_token; k++)
+                    {
+                        copy_token[k] = '\0';
+                    }
+
+                    /* 文字列切り出し */
+                    for (size_t k = 0; k < strlen(*function_commands[j].token); k++)
+                    {
+                        copy_token[k] = rows[program_count * x_size + k + strlen(*flow_commands[i].token) + 1];
+                    }
+
+                    /* 関数コマンドがあるか判定 */
+                    if (strcmp(copy_token, *function_commands[j].token) == 0)
+                    {
+                        /* 引数の配列 */
+                        int arguments[8];
+                        _Bool isGoto;
+                        
+                        memcpy(arguments, get_arguments(rows, x_size, *flow_commands[i].token, *function_commands[j].token), sizeof *get_arguments(rows, x_size, *flow_commands[i].token, *function_commands[j].token));
+                        isGoto = run_function_command(*function_commands[j].code, arguments);
+
+                        /* PCを変更するか判断 */
+                        if (isGoto)
+                        {
+                            
+                        }
+                    }
+                }
             }
+            
         }
     }
 
