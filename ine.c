@@ -192,14 +192,13 @@ void run_commands(char* rows, size_t x_size, size_t y_size)
                     for (size_t k = 0; k < sizeof copy_token; k++)
                     {
                         copy_token[k] = '\0';
-                        printf("%c,", copy_token[k]);
                     }
 
                     /* 文字列切り出し */
                     for (size_t k = 0; k < strlen(*function_commands[j].token); k++)
                     {
-                        // printf("b: %c\n", rows[program_count * x_size + k + strlen(*flow_commands[i].token) + 1]);
                         copy_token[k] = rows[program_count * x_size + k + strlen(*flow_commands[i].token) + 1];
+                        // printf("b: %lu\n", program_count * x_size + k + strlen(*flow_commands[i].token) + 1);
                     }
 
                     // printf("c: %s\n", copy_token);
@@ -216,6 +215,7 @@ void run_commands(char* rows, size_t x_size, size_t y_size)
                 }
 
                 program_count++;
+                printf("Hello\n");
             }
         }
     }
@@ -237,12 +237,12 @@ int main(void)
     char file_row[128];
     while (fgets(file_row, 128, filep)[strlen(file_row) - 1] == '\n')
     {
-        memmove(source_code_rows[get_file_row], file_row, sizeof file_row);
+        memcpy(source_code_rows[get_file_row], file_row, sizeof file_row);
 
         get_file_row++;
     }
     fgets(file_row, 128, filep);
-    memmove(source_code_rows[get_file_row], file_row, sizeof file_row);
+    memcpy(source_code_rows[get_file_row], file_row, sizeof file_row);
 
     run_commands(&source_code_rows[0][0], 128, 256);
     
