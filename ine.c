@@ -215,7 +215,6 @@ void run_commands(char* rows, size_t x_size, size_t y_size)
                 }
 
                 program_count++;
-                printf("Hello\n");
             }
         }
     }
@@ -232,17 +231,16 @@ int main(void)
     FILE* filep = fopen("sample.ine", "r");
 
     char source_code_rows[256][128];
-    size_t get_file_row = 0;
 
     char file_row[128];
-    while (fgets(file_row, 128, filep)[strlen(file_row) - 1] == '\n')
+    for (size_t i = 0; fgets(file_row, 128, filep) != NULL; i++)
     {
-        memcpy(source_code_rows[get_file_row], file_row, sizeof file_row);
-
-        get_file_row++;
+        for (size_t j = 0; j < strlen(file_row); j++)
+        {
+            source_code_rows[i][j] = '\0';
+            source_code_rows[i][j] = file_row[j];
+        }
     }
-    fgets(file_row, 128, filep);
-    memcpy(source_code_rows[get_file_row], file_row, sizeof file_row);
 
     run_commands(&source_code_rows[0][0], 128, 256);
     
