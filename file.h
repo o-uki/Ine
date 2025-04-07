@@ -1,0 +1,1 @@
+char file_name[] = "sample.ine";
