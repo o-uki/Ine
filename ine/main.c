@@ -3,6 +3,7 @@
 #include "./token.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 /* ソースコードの最大行列数 */
 #define MAX_ROW_SIZE 256
@@ -10,7 +11,7 @@
 
 int main(void)
 {
-    /* ファイル読み込み */
+    /* ファイル読み込み用の変数 */
     FILE* file_point = fopen(file_name, "r");
     char source_code[MAX_ROW_SIZE][MAX_COLUMN_SIZE];
 
@@ -20,11 +21,54 @@ int main(void)
     /* PC */
     size_t program_count = 0;
 
+    /* フローコマンドの配列 */
+    struct Command flow_commands[] = {
+        {.token = "I", .code = "sequence"},
+        {.token = "?", .code = "selection"}
+    };
+
+    /* 関数コマンドの配列 */
+    struct Command function_commands[] = {
+        {.token = "wr", .code = "write"},
+        {.token = "eq", .code = "equal"}
+    };
+
+    /* ファイル読み込み */
     for (size_t i = 0; fgets(source_code[i], MAX_COLUMN_SIZE, file_point) != NULL; i++);
 
     while (source_code[program_count][0] != '\0')
     {
-        
+        /* フローコマンドを取得 */
+        for (size_t i = 0; i < sizeof flow_commands / sizeof flow_commands[0]; i++)
+        {
+            if (strcmp(string_subtract(source_code[program_count], copy_string, 0, strlen(flow_commands[i].token)), flow_commands[i].token) == 0)
+            {
+                if (strcmp(flow_commands[i].code, "sequence") == 0)
+                {
+                    for (size_t j = 0; j < sizeof function_commands / sizeof function_commands[0]; j++)
+                    {
+                        if (strcmp(string_subtract(source_code[program_count], copy_string, flow_commands[i].token + 1, strlen(function_commands[j].token)), function_commands[j].token))
+                        {
+                            if (source_code[program_count][strlen(flow_commands[i].token)] = ' ')
+                            {
+                                /* code */
+                            } else
+                            {
+                                /* フローコマンドと関数コマンドの間に空白がなければエラー */
+                                get_error();
+                            }
+                        }
+                    }
+                }
+
+                continue;
+            } else if (i + 1 < sizeof flow_commands / sizeof flow_commands[0])
+            {
+                /* フローコマンドが認識されなかったときのエラー */
+                get_error();
+            }
+            
+        }
     }
 
     return 0;
@@ -46,4 +90,10 @@ char* string_subtract(char* string, char* copy_string, int start_index, int leng
     }
 
     return copy_string;
+}
+
+void get_error()
+{
+    printf("Error!!\n");
+    exit(EXIT_FAILURE);
 }
