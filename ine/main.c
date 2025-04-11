@@ -16,9 +16,12 @@ void get_error();
 /* コマンドの型 */
 struct Token
 {
-    char *token;
-    char *code;
+    char* token;
+    char* code;
 };
+
+/* 引数を記号で区切る */
+void separate_arguments(char* argument_string, char* prefix_arugments, size_t x_size);
 
 int main(void)
 {
@@ -42,12 +45,6 @@ int main(void)
     struct Token function_commands[] = {
         {.token = "wr", .code = "write"},
         {.token = "eq", .code = "equal"}
-    };
-
-    /* 接中辞の配列 */
-    struct Token infix[] = {
-        {.token = ",", .code = "separate"},
-        {.token = "+", .code = "plus"}
     };
     
     /* 接頭辞の配列 */
@@ -77,7 +74,21 @@ int main(void)
                         {
                             if (source_code[program_count][strlen(flow_commands[i].token)] == ' ')
                             {
-                                
+                                char prefix_argument_strings[32][64];
+
+                                for (size_t k = 0; k < strlen(source_code[program_count]); k++)
+                                {
+                                    if (source_code[program_count][k] == ')')
+                                    {
+                                        string_subtract(source_code[program_count], copy_string, strlen(flow_commands[i].token) + strlen(function_commands[j].token) + 1, k - 3);
+
+                                        break;
+                                    };
+                                }
+
+                                separate_arguments(copy_string, &prefix_argument_strings[0][0], 64);
+                                printf("%s\n", prefix_argument_strings[0]);
+                                printf("%s\n", prefix_argument_strings[1]);
                                 
                                 break;
                             } else
@@ -128,23 +139,28 @@ void get_error()
 }
 
 /* 引数を区切る */
-void separate_arguments(struct Token* infixes, char* argument_string, char* fix_arugments)
+void separate_arguments(char* argument_string, char* prefix_arugments, size_t x_size)
 {
-    size_t infix_index;
+    size_t argument_length = 0, argument_count = 0;
     char copy_string[64];
 
-    for (size_t i = 0; i < sizeof *infixes / sizeof infixes[0]; i++)
+    if (prefix_arugments[0] != '(')
     {
-        if (strcmp(infixes[i].code, "separate") == 0)
+        for (size_t i = 0; i < strlen(argument_string); i++)
         {
-            infix_index = i;
+            if (argument_string[i] == ',' || argument_string[i] == ')')
+            {
+                string_subtract(argument_string, &prefix_arugments[x_size * argument_count], i - argument_length, argument_length);
+                argument_count++;
 
-            break;
+                argument_length = 0;
+            } else if (argument_string[i] != '(')
+            {
+                argument_length++;
+            }
         }
-    }
-    
-    for (size_t i = 0; i < strlen(argument_string); i += strlen(infixes[infix_index].token))
+    } else
     {
-        
+        get_error();
     }
 }
