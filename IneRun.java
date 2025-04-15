@@ -4,23 +4,34 @@ import java.nio.file.Path;
 import java.util.function.Function;
 import java.util.List;
 
-class IneRun {
+class FlowCommand {
+    public String token;
+    public String name;
+
+    public FlowCommand(String setToken, String setName) {
+        this.token = setToken;
+        this.name = setName;
+    }
+}
+
+public class IneRun {
     public static void main(String[] args) {
         try {
             // ファイル読み込み
             List<String> sourceCode = Files.readAllLines(Path.of("sample.ine"));
-            System.out.print(sourceCode + "\n");
 
             // PC
             int programCount = 0;
 
-            // 順序記号の配列
+            // 順序コマンド
             FlowCommand flowCommands[] = new FlowCommand[3];
             flowCommands[0] = new FlowCommand("I", "sequence");
             flowCommands[1] = new FlowCommand("?", "selection");
             flowCommands[2] = new FlowCommand("+", "join");
 
-            System.out.print(flowCommands[0].name);
+            while (programCount < sourceCode.size()) {
+                programCount++;
+            }
 
             // Function<String, Integer> runner = (str) -> {
             //     System.out.print(Integer.parseInt(str));
